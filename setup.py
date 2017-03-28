@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="lazada_scsdk",
-    version="0.1.0",
+    version="0.1.1",
     description="Lazada Seller Center SDK",
     url="https://github.com/hmphu",
     author="hmphu",

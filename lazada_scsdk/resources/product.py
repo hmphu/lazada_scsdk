@@ -14,6 +14,9 @@ class Product(Resource):
             kwargs['Filter'] = 'live'
 
         response = self.get_url('GetProducts', **kwargs)
+        if not response:
+            return None
+
         products = response['SuccessResponse']['Body']['Products']
         if not products:
             return None
@@ -21,13 +24,33 @@ class Product(Resource):
 
     def fetch(self, seller_sku, **kwargs):
         """"
-        Fetch Product for given Id
+        Fetch Product for given selelr sku
         """
         kwargs['SkuSellerList'] = '["' + seller_sku + '"]'
         products = self.fetch_all(**kwargs)
         if not products:
-            return None
+            return self.search_by_seller_sku(seller_sku)
         return products[0]
+
+    def search_by_seller_sku(self, seller_sku, **kwargs):
+        """"
+        Searcg Product by given seller sku
+        """
+        kwargs['Search'] = self.no_accent_vietnamese(seller_sku)
+        products = self.fetch_all(**kwargs)
+        if not products:
+            return None
+
+        for product in products:
+            if product['Skus']:
+                for sku in product['Skus']:
+                    if sku['SellerSku'].upper().strip() == seller_sku.upper().strip():
+                        return product
+            else:
+                if product['SellerSku'].upper().strip() == seller_sku.upper().strip():
+                    return product
+
+        return None
 
     def create(self, data, **kwargs):
         """"
