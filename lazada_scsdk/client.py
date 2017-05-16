@@ -1,4 +1,3 @@
-import requests
 import json
 import urllib
 import urllib.request
@@ -9,6 +8,7 @@ from . import resources
 from types import ModuleType
 import xml.etree.ElementTree as ET
 from .errors import BaseError
+from http_request_randomizer.requests.proxy.requestProxy import RequestProxy
 
 
 class Zone(tzinfo):
@@ -99,12 +99,12 @@ class Client:
         parameters['Signature'] = HMAC(self.api_key.encode(), concatenated.encode(), sha256).hexdigest()
         url = self.options['base_url'] + '?' + urllib.parse.urlencode(parameters)
 
-        print(url)
+        req_proxy = RequestProxy()
 
         if(method == 'get'):
-            response = requests.get(url)
+            response = req_proxy.generate_proxied_request(url)
         else:
-            response = requests.post(url, data=self._prepare_xml(request_options['data']))
+            response = req_proxy.generate_proxied_request(url, method="POST", data=self._prepare_xml(request_options['data']))
 
         if(response.ok):
             if(self.options['api_format'] == 'json'):
