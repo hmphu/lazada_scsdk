@@ -102,9 +102,9 @@ class Client:
         print(url)
 
         if(method == 'get'):
-            response = requests.get(url)
+            response = requests.get(url, timeout=120)
         else:
-            response = requests.post(url, data=self._prepare_xml(request_options['data']))
+            response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=120)
 
         if(response.ok):
             if(self.options['api_format'] == 'json'):
