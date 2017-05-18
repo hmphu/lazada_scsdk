@@ -1,4 +1,4 @@
-# import requests
+import requests
 import json
 import urllib
 import urllib.request
@@ -47,7 +47,8 @@ class Client:
     DEFAULTS = {
         'base_url': 'https://api.sellercenter.lazada.vn/',
         'api_version': '1.0',
-        'api_format': 'json'
+        'api_format': 'json',
+        'use_proxy': False
     }
 
     CLIENT_OPTIONS = set(DEFAULTS.keys())
@@ -100,14 +101,21 @@ class Client:
         parameters['Signature'] = HMAC(self.api_key.encode(), concatenated.encode(), sha256).hexdigest()
         url = self.options['base_url'] + '?' + urllib.parse.urlencode(parameters)
 
-        req_proxy = RequestProxy()
+        print(url)
 
-        if(method == 'get'):
-            response = req_proxy.generate_proxied_request(url)
+        if(self.options['use_proxy'] is True):
+            req_proxy = RequestProxy()
+            if(method == 'get'):
+                response = req_proxy.generate_proxied_request(url)
+            else:
+                response = req_proxy.generate_proxied_request(url, method="POST", data=self._prepare_xml(request_options['data']))
         else:
-            response = req_proxy.generate_proxied_request(url, method="POST", data=self._prepare_xml(request_options['data']))
+            if(method == 'get'):
+                response = requests.get(url, timeout=None)
+            else:
+                response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=None)
 
-        if(response.ok):
+        if response is not None and response.ok is True:
             if(self.options['api_format'] == 'json'):
                 return self._check_json_response(response.json())
             return self._check_xml_response(response.text)
