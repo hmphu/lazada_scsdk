@@ -10,8 +10,8 @@ class Product(Resource):
         """"
         Fetch all Product entities
         """
-        if 'Filter' not in kwargs:
-            kwargs['Filter'] = 'live'
+        # if 'Filter' not in kwargs:
+        #     kwargs['Filter'] = 'live'
 
         response = self.get_url('GetProducts', **kwargs)
         if not response:
