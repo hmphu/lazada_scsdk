@@ -1,4 +1,7 @@
+import os
+import pickle
 import requests
+import tempfile
 import json
 import urllib
 import urllib.request
@@ -9,7 +12,7 @@ from . import resources
 from types import ModuleType
 import xml.etree.ElementTree as ET
 from .errors import BaseError
-from http_request_randomizer.requests.proxy.requestProxy import RequestProxy
+from .proxy import Proxy
 
 
 class Zone(tzinfo):
@@ -60,6 +63,9 @@ class Client:
     def __init__(self, email=None, api_key=None, **options):
         self.email = email
         self.api_key = api_key
+        self.proxies_file_path = os.path.join(tempfile.gettempdir(), 'lazada_scsdk_proxies.tmp')
+        open(self.proxies_file_path, 'a').close()  # make sure the file is exist
+        # print(self.proxies_file_path)
 
         # merge the provided options (if any) with the global DEFAULTS
         self.options = _merge(self.DEFAULTS, options)
@@ -104,11 +110,14 @@ class Client:
         print(url)
 
         if(self.options['use_proxy'] is True):
-            req_proxy = RequestProxy()
+            proxies_list = self.load_proxy_list()
+            req_proxy = Proxy(proxies_list)
+
             if(method == 'get'):
                 response = req_proxy.generate_proxied_request(url)
             else:
                 response = req_proxy.generate_proxied_request(url, method="POST", data=self._prepare_xml(request_options['data']))
+            self.save_proxy_list(req_proxy.get_proxy_list())
         else:
             if(method == 'get'):
                 response = requests.get(url, timeout=None)
@@ -121,6 +130,24 @@ class Client:
             return self._check_xml_response(response.text)
 
         return response.raise_for_status()
+
+    def load_proxy_list(self):
+        proxies_list = []
+        with open(self.proxies_file_path, "rb") as fp:
+            try:
+                proxies_list = pickle.load(fp)
+            except:
+                return []
+
+        return proxies_list
+
+    def save_proxy_list(self, proxies_list):
+        with open(self.proxies_file_path, "wb") as fp:
+            try:
+                pickle.dump(proxies_list, fp)
+            except:
+                return []
+        return proxies_list
 
     def get(self, action, **options):
         """
