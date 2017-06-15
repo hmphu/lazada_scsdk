@@ -1,4 +1,6 @@
 import os
+import platform
+import time
 import pickle
 import requests
 import tempfile
@@ -124,20 +126,24 @@ class Client:
             else:
                 response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=None)
 
-        if response is not None and response.ok is True:
-            if(self.options['api_format'] == 'json'):
-                return self._check_json_response(response.json())
-            return self._check_xml_response(response.text)
+        if response is not None:
+            if response.ok is True:
+                if(self.options['api_format'] == 'json'):
+                    return self._check_json_response(response.json())
+                return self._check_xml_response(response.text)
+            return response.raise_for_status()
 
-        return response.raise_for_status()
+        return ""
 
     def load_proxy_list(self):
         proxies_list = []
-        with open(self.proxies_file_path, "rb") as fp:
-            try:
-                proxies_list = pickle.load(fp)
-            except:
-                return []
+        creation_date = self.creation_date(self.proxies_file_path)
+        if creation_date > time.time() - 86400:
+            with open(self.proxies_file_path, "rb") as fp:
+                try:
+                    proxies_list = pickle.load(fp)
+                except:
+                    return []
 
         return proxies_list
 
@@ -245,3 +251,23 @@ class Client:
             if (invert and key not in keys) or (not invert and key in keys):
                 result[key] = options[key]
         return result
+
+    def creation_date(self, path_to_file):
+        """
+        Try to get the date that a file was created, falling back to when it was
+        last modified if that isn't possible.
+        See http://stackoverflow.com/a/39501288/1709587 for explanation.
+        """
+        try:
+            if platform.system() == 'Windows':
+                return os.path.getctime(path_to_file)
+            else:
+                stat = os.stat(path_to_file)
+                try:
+                    return stat.st_birthtime
+                except AttributeError:
+                    # We're probably on Linux. No easy way to get creation dates here,
+                    # so we'll settle for when its content was last modified.
+                    return stat.st_mtime
+        except Exception:
+            return 0

@@ -2,7 +2,7 @@
 # @Author: Phu Hoang
 # @Date:   2017-05-23 09:40:32
 # @Last Modified by:   Phu Hoang
-# @Last Modified time: 2017-05-23 11:29:36
+# @Last Modified time: 2017-06-15 16:54:09
 
 import logging
 from requests.exceptions import ReadTimeout
