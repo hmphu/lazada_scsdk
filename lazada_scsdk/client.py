@@ -54,6 +54,7 @@ class Client:
         'api_version': '1.0',
         'api_format': 'json',
         'use_proxy': False,
+        'proxies': None,
         'proxy_timeout': 30,
     }
 
@@ -112,8 +113,11 @@ class Client:
 
         print(url)
 
-        if(self.options['use_proxy'] is True):
-            proxies_list = self.load_proxy_list()
+        if self.options['use_proxy'] is True:
+            if self.options['proxies'] is not None:
+                proxies_list = self.options['proxies']
+            else:
+                proxies_list = self.load_proxy_list()
             req_proxy = Proxy(proxies_list)
 
             if(method == 'get'):
