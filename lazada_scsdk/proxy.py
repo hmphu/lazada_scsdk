@@ -2,7 +2,7 @@
 # @Author: Phu Hoang
 # @Date:   2017-05-23 09:40:32
 # @Last Modified by:   Phu Hoang
-# @Last Modified time: 2017-06-15 16:54:09
+# @Last Modified time: 2017-06-15 17:35:29
 
 import logging
 from requests.exceptions import ReadTimeout
@@ -21,7 +21,7 @@ handler.setFormatter(formatter)
 
 
 class Proxy(RequestProxy):
-    def __init__(self, web_proxy_list=[], sustain=False, timeout=5):
+    def __init__(self, web_proxy_list=[], sustain=False, timeout=20):
         self.userAgent = UserAgentManager()
         self.logger = logging.getLogger()
         self.logger.addHandler(handler)

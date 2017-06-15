@@ -53,7 +53,8 @@ class Client:
         'base_url': 'https://api.sellercenter.lazada.vn/',
         'api_version': '1.0',
         'api_format': 'json',
-        'use_proxy': False
+        'use_proxy': False,
+        'proxy_timeout': 30,
     }
 
     CLIENT_OPTIONS = set(DEFAULTS.keys())
@@ -116,9 +117,9 @@ class Client:
             req_proxy = Proxy(proxies_list)
 
             if(method == 'get'):
-                response = req_proxy.generate_proxied_request(url)
+                response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'])
             else:
-                response = req_proxy.generate_proxied_request(url, method="POST", data=self._prepare_xml(request_options['data']))
+                response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'], method="POST", data=self._prepare_xml(request_options['data']))
             self.save_proxy_list(req_proxy.get_proxy_list())
         else:
             if(method == 'get'):
