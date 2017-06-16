@@ -113,13 +113,16 @@ class Client:
 
         print(url)
         
-        response = requests.get('http://proxy.tekbreak.com/best/json')
-        if response is not None and response.ok is True:
-            data = json.loads(response.text)
-            if self.options['proxies'] is None:
-                self.options['proxies'] = [
-                    data[0]['type'].lower() + '://' +  data[0]['ip'] + ':' + data[0]['port']
-                ]
+        if self.options['proxies'] is None:
+            proxies_list = self.load_proxy_list()
+            if len(proxies_list) == 0:
+                response = requests.get('http://proxy.tekbreak.com/best/json')
+                if response is not None and response.ok is True:
+                    data = json.loads(response.text)
+                    proxies_list = [
+                        data[0]['type'].lower() + '://' +  data[0]['ip'] + ':' + data[0]['port']
+                    ]
+                    self.options['proxies'] = proxies_list
     
         if self.options['use_proxy'] is True:
             if self.options['proxies'] is not None:
