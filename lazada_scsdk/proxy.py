@@ -32,10 +32,10 @@ class Proxy(RequestProxy):
         # Each of the classes below implements a specific URL Parser
         #####
         parsers = list([])
-        parsers.append(FreeProxyParser('http://free-proxy-list.net', timeout=timeout))
+        # parsers.append(FreeProxyParser('http://free-proxy-list.net', timeout=timeout))
         parsers.append(ProxyForEuParser('http://proxyfor.eu/geo.php', 1.0, timeout=timeout))
         parsers.append(RebroWeeblyParser('http://rebro.weebly.com', timeout=timeout))
-        # parsers.append(SamairProxyParser('http://samair.ru/proxy/time-01.htm', timeout=timeout))
+        parsers.append(SamairProxyParser('http://samair.ru/proxy/time-01.htm', timeout=timeout))
         parsers.append(HideMyAssProxyParser('http://proxylist.hidemyass.com/', timeout=timeout))
 
         self.sustain = sustain
