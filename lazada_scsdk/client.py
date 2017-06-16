@@ -117,7 +117,7 @@ class Client:
             self.proxies_file_path = os.path.join(tempfile.gettempdir(), 'lazada_scsdk_api_proxies.tmp')
             open(self.proxies_file_path, 'a').close()  # make sure the file is exist
             proxies_list = self.load_proxy_list()
-            if len(proxies_list) == 0:
+            if not proxies_list or len(proxies_list) == 0:
                 response = requests.get('http://proxy.tekbreak.com/best/json')
                 if response is not None and response.ok is True:
                     data = json.loads(response.text)
