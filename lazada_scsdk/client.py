@@ -124,7 +124,9 @@ class Client:
                 response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'])
             else:
                 response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'], method="POST", data=self._prepare_xml(request_options['data']))
-            self.save_proxy_list(req_proxy.get_proxy_list())
+                
+            if self.options['proxies'] is None:
+                self.save_proxy_list(req_proxy.get_proxy_list())
         else:
             if(method == 'get'):
                 response = requests.get(url, timeout=None)
