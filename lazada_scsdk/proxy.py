@@ -2,7 +2,7 @@
 # @Author: Phu Hoang
 # @Date:   2017-05-23 09:40:32
 # @Last Modified by:   Phu Hoang
-# @Last Modified time: 2017-06-15 17:35:29
+# @Last Modified time: 2017-06-16 10:53:12
 
 import logging
 from requests.exceptions import ReadTimeout
@@ -10,7 +10,8 @@ from http_request_randomizer.requests.proxy.requestProxy import RequestProxy
 from http_request_randomizer.requests.parsers.FreeProxyParser import FreeProxyParser
 from http_request_randomizer.requests.parsers.ProxyForEuParser import ProxyForEuParser
 from http_request_randomizer.requests.parsers.RebroWeeblyParser import RebroWeeblyParser
-# from http_request_randomizer.requests.parsers.SamairProxyParser import SamairProxyParser
+from http_request_randomizer.requests.parsers.SamairProxyParser import SamairProxyParser
+from http_request_randomizer.requests.parsers.HideMyAssProxyParser import HideMyAssProxyParser
 from http_request_randomizer.requests.useragent.userAgent import UserAgentManager
 
 # Push back requests library to at least warnings
@@ -34,7 +35,8 @@ class Proxy(RequestProxy):
         parsers.append(FreeProxyParser('http://free-proxy-list.net', timeout=timeout))
         parsers.append(ProxyForEuParser('http://proxyfor.eu/geo.php', 1.0, timeout=timeout))
         parsers.append(RebroWeeblyParser('http://rebro.weebly.com', timeout=timeout))
-        # parsers.append(SamairProxyParser('https://samair.ru/proxy/time-01.htm', timeout=timeout))
+        parsers.append(SamairProxyParser('http://samair.ru/proxy/time-01.htm', timeout=timeout))
+        parsers.append(HideMyAssProxyParser('http://proxylist.hidemyass.com/', timeout=timeout))
 
         self.sustain = sustain
         self.parsers = parsers
