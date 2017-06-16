@@ -143,7 +143,7 @@ class Client:
     def load_proxy_list(self):
         proxies_list = []
         creation_date = self.creation_date(self.proxies_file_path)
-        if creation_date > time.time() - 86400:
+        if creation_date > time.time() - 900:
             with open(self.proxies_file_path, "rb") as fp:
                 try:
                     proxies_list = pickle.load(fp)
