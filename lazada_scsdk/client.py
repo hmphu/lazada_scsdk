@@ -113,7 +113,9 @@ class Client:
 
         print(url)
         
-        if self.options['proxies'] is None:
+        if self.options['proxies'] == True:
+            self.proxies_file_path = os.path.join(tempfile.gettempdir(), 'lazada_scsdk_api_proxies.tmp')
+            open(self.proxies_file_path, 'a').close()  # make sure the file is exist
             proxies_list = self.load_proxy_list()
             if len(proxies_list) == 0:
                 response = requests.get('http://proxy.tekbreak.com/best/json')
@@ -135,9 +137,7 @@ class Client:
                 response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'])
             else:
                 response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'], method="POST", data=self._prepare_xml(request_options['data']))
-                
-            if self.options['proxies'] is None:
-                self.save_proxy_list(req_proxy.get_proxy_list())
+            self.save_proxy_list(req_proxy.get_proxy_list())
         else:
             if(method == 'get'):
                 response = requests.get(url, timeout=None)
