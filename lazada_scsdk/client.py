@@ -114,6 +114,7 @@ class Client:
         print(url)
         
         if self.options['proxies'] == True:
+            self.options['proxies'] = []
             response = requests.get('http://proxy.tekbreak.com/best/json')
             if response is not None and response.ok is True:
                 data = json.loads(response.text)
