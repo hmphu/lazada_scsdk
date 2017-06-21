@@ -1,12 +1,10 @@
 import os
 import platform
-import time
-import pickle
 import requests
-import tempfile
 import json
 import urllib
 import urllib.request
+import random
 from hashlib import sha256
 from hmac import HMAC
 from datetime import datetime, tzinfo, timedelta
@@ -14,7 +12,6 @@ from . import resources
 from types import ModuleType
 import xml.etree.ElementTree as ET
 from .errors import BaseError
-from .proxy import Proxy
 
 
 class Zone(tzinfo):
@@ -53,9 +50,7 @@ class Client:
         'base_url': 'https://api.sellercenter.lazada.vn/',
         'api_version': '1.0',
         'api_format': 'json',
-        'use_proxy': False,
         'proxies': None,
-        'proxy_timeout': 30,
     }
 
     CLIENT_OPTIONS = set(DEFAULTS.keys())
@@ -67,10 +62,6 @@ class Client:
     def __init__(self, email=None, api_key=None, **options):
         self.email = email
         self.api_key = api_key
-        self.proxies_file_path = os.path.join(tempfile.gettempdir(), 'lazada_scsdk_proxies.tmp')
-        open(self.proxies_file_path, 'a').close()  # make sure the file is exist
-        # print(self.proxies_file_path)
-
         # merge the provided options (if any) with the global DEFAULTS
         self.options = _merge(self.DEFAULTS, options)
 
@@ -78,6 +69,14 @@ class Client:
         # injecting this client object into the constructor
         for name, Klass in RESOURCE_CLASSES.items():
             setattr(self, name, Klass(self))
+
+    def get_random_proxy(self):
+        if len(self.options['proxies']) == 0:
+            return None
+        rand_proxy = random.choice(self.options['proxies'])
+        while not rand_proxy:
+            rand_proxy = random.choice(self.options['proxies'])
+        return rand_proxy
 
     def request(self, method, action, **options):
         """
@@ -110,26 +109,20 @@ class Client:
         concatenated = concatenated.replace('+', '%20')
         parameters['Signature'] = HMAC(self.api_key.encode(), concatenated.encode(), sha256).hexdigest()
         url = self.options['base_url'] + '?' + urllib.parse.urlencode(parameters)
+        proxy = None
 
-        print(url)
+        if self.options['proxies'] is not None:
+            proxy = self.get_random_proxy()
 
-        if self.options['use_proxy'] is True:
-            if self.options['proxies'] is not None:
-                proxies_list = self.options['proxies']
-            else:
-                proxies_list = self.load_proxy_list()
-            req_proxy = Proxy(proxies_list)
+        if proxy is not None:
+            print('USING proxy:' + proxy)
+            protocol = proxy.split("://")[0]
+            proxy = {protocol: proxy}
 
-            if(method == 'get'):
-                response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'])
-            else:
-                response = req_proxy.generate_proxied_request(url, req_timeout=self.options['proxy_timeout'], method="POST", data=self._prepare_xml(request_options['data']))
-            self.save_proxy_list(req_proxy.get_proxy_list())
+        if(method == 'get'):
+            response = requests.get(url, timeout=None, proxies=proxy)
         else:
-            if(method == 'get'):
-                response = requests.get(url, timeout=None)
-            else:
-                response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=None)
+            response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=None, proxies=proxy)
 
         if response is not None:
             if response.ok is True:
@@ -139,26 +132,6 @@ class Client:
             return response.raise_for_status()
 
         return ""
-
-    def load_proxy_list(self):
-        proxies_list = []
-        creation_date = self.creation_date(self.proxies_file_path)
-        if creation_date > time.time() - 86400:
-            with open(self.proxies_file_path, "rb") as fp:
-                try:
-                    proxies_list = pickle.load(fp)
-                except:
-                    return []
-
-        return proxies_list
-
-    def save_proxy_list(self, proxies_list):
-        with open(self.proxies_file_path, "wb") as fp:
-            try:
-                pickle.dump(proxies_list, fp)
-            except:
-                return []
-        return proxies_list
 
     def get(self, action, **options):
         """
