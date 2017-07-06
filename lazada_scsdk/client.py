@@ -12,6 +12,7 @@ from . import resources
 from types import ModuleType
 import xml.etree.ElementTree as ET
 from .errors import BaseError
+from .useragent import UserAgentManager
 
 
 class Zone(tzinfo):
@@ -65,10 +66,19 @@ class Client:
         # merge the provided options (if any) with the global DEFAULTS
         self.options = _merge(self.DEFAULTS, options)
 
+        self.userAgent = UserAgentManager()
+
         # intializes each resource
         # injecting this client object into the constructor
         for name, Klass in RESOURCE_CLASSES.items():
             setattr(self, name, Klass(self))
+
+    def generate_random_request_headers(self):
+        headers = {
+            "Connection": "close",  # another way to cover tracks
+            "User-Agent": self.userAgent.get_random_user_agent()
+        }  # select a random user agent
+        return headers
 
     def get_random_proxy(self):
         if len(self.options['proxies']) == 0:
@@ -119,10 +129,14 @@ class Client:
             protocol = proxy.split("://")[0]
             proxy = {protocol: proxy}
 
+        headers = self.generate_random_request_headers()
+
+        # print(headers)
+
         if(method == 'get'):
-            response = requests.get(url, timeout=None, proxies=proxy)
+            response = requests.get(url, timeout=None, proxies=proxy, headers=headers)
         else:
-            response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=None, proxies=proxy)
+            response = requests.post(url, data=self._prepare_xml(request_options['data']), timeout=None, proxies=proxy, headers=headers)
 
         if response is not None:
             if response.ok is True:
