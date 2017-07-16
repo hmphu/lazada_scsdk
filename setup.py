@@ -10,8 +10,8 @@ setup(
     license="MIT",
     install_requires=["requests"],
     include_package_data=True,
-    package_dir={'lazada_scsdk': 'lazada_scsdk', 'lazada_scsdk.resources': 'lazada_scsdk/resources', 'lazada_scsdk.requests': 'lazada_scsdk/requests'},
-    packages=['lazada_scsdk', 'lazada_scsdk.resources', 'lazada_scsdk.requests'],
+    package_dir={'lazada_scsdk': 'lazada_scsdk', 'lazada_scsdk.resources': 'lazada_scsdk/resources', 'lazada_scsdk.requests': 'lazada_scsdk/requests', 'lazada_scsdk.useragent': 'lazada_scsdk/useragent'},
+    packages=['lazada_scsdk', 'lazada_scsdk.resources', 'lazada_scsdk.requests', 'lazada_scsdk/useragent'],
     keywords='lazada seller center sdk',
     classifiers=[
         "Development Status :: 1 - Beta",
