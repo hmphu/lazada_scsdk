@@ -9,7 +9,11 @@ setup(
     author_email="me@hmphu.com",
     license="MIT",
     install_requires=["requests"],
-    include_package_data=True,
+    # include_package_data=True,
+    package_data={
+        # Include user_agents.txt files
+        'lazada_scsdk': ['data/*'],
+    },
     package_dir={'lazada_scsdk': 'lazada_scsdk', 'lazada_scsdk.resources': 'lazada_scsdk/resources', 'lazada_scsdk.requests': 'lazada_scsdk/requests', 'lazada_scsdk.useragent': 'lazada_scsdk/useragent'},
     packages=['lazada_scsdk', 'lazada_scsdk.resources', 'lazada_scsdk.requests', 'lazada_scsdk/useragent'],
     keywords='lazada seller center sdk',
